@@ -1,0 +1,15 @@
+{
+  "name": "insomnia-plugin-lagoon-token",
+  "version": "0.0.1",
+  "private": true,
+  "insomnia": {
+    "name": "lagoon-token",
+    "displayName": "Lagoon token",
+    "description": "Fetches a Lagoon token using the provided SSH key.",
+    "images": {
+      "icon": "icon.svg",
+      "cover": "cover.svg"
+    }
+  },
+  "main": "main.js"
+}
