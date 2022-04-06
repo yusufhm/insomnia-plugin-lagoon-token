@@ -1,6 +1,16 @@
 {
   "name": "insomnia-plugin-lagoon-token",
-  "version": "0.0.1",
+  "version": "0.1.0",
+  "author": "Yusuf Hasan Miyan <yusuf.hasanmiyan@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yusufhm/insomnia-plugin-lagoon-token.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yusufhm/insomnia-plugin-lagoon-token/issues"
+  },
+  "homepage": "https://github.com/yusufhm/insomnia-plugin-lagoon-token",
   "private": true,
   "insomnia": {
     "name": "lagoon-token",
