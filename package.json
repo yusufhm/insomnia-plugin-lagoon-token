@@ -11,7 +11,6 @@
     "url": "https://github.com/yusufhm/insomnia-plugin-lagoon-token/issues"
   },
   "homepage": "https://github.com/yusufhm/insomnia-plugin-lagoon-token",
-  "private": true,
   "insomnia": {
     "name": "lagoon-token",
     "displayName": "Lagoon token",
