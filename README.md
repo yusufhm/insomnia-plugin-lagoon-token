@@ -8,6 +8,8 @@ Either:
 - Open Insomnia, Click on the Cog Top Right, Click Plugins and use `insomnia-plugin-lagoon-token` as the Package to install
 - Find this plugin on the [Insomnia Plugins list](https://insomnia.rest/plugins/insomnia-plugin-lagoon-token) instead!
 
+In case there's an error when installing as above, go into the [plugins directory](https://docs.insomnia.rest/insomnia/introduction-to-plugins#plugin-file-location) and run `npm install insomnia-plugin-lagoon-token` manually.
+
 ## Configuration
 
 The plugin expects the following variables in an environment:
