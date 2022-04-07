@@ -20,7 +20,7 @@ The plugin expects the following variables in an environment:
 | lagoon_ssh_private_key |    No    | `/your/user/home/.ssh/id_ed25519` or `/your/user/home/.ssh/id_rsa` | The private key to use for SSH; this should have already been added to your user in the Lagoon UI[^2].                             |
 
 [^1]: Defaults are taken from the [Lagoon GraphQL documentation](https://docs.lagoon.sh/using-lagoon-advanced/graphql/).
-[^2]: Added an SSH key to your Lagoon user: https://docs.lagoon.sh/using-lagoon-advanced/ssh/
+[^2]: Adding an SSH key to your Lagoon user: https://docs.lagoon.sh/using-lagoon-advanced/ssh/
 
 ### After installing the plugin
 
