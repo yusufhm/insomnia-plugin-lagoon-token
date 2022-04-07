@@ -1,51 +1,76 @@
-/**
- * Template tag that fetches a Lagoon token.
- */
+const HOME = require('os').homedir();
 
-const homedir = require('os').homedir();
+const DEFAULT_GRAPHQL_URL = "https://api.lagoon.amazeeio.cloud/graphql";
+const DEFAULT_SSH_HOST = "ssh.lagoon.amazeeio.cloud";
+const DEFAULT_SSH_PORT = 32222;
+const DEFAULT_SSH_PRIVATE_KEYS = [
+    `${HOME}/.ssh/id_ed25519`,
+    `${HOME}/.ssh/id_rsa`,
+];
 
-module.exports.templateTags = [{
-    name: 'lagoonToken',
-    displayName: 'Lagoon Token',
-    description: 'Fetches a token from Lagoon using the SSH key provided.',
-    args: [
-        {
-            displayName: 'Private key',
-            description: 'Path to the private ssh key',
-            type: 'string',
-            defaultValue: `${homedir}/.ssh/id_ed25519`
-        },
-        {
-            displayName: 'Host',
-            description: 'The Lagoon SSH hostname',
-            type: 'string',
-            defaultValue: 'ssh.lagoon.amazeeio.cloud'
-        },
-        {
-            displayName: 'Port',
-            description: 'The Lagoon SSH port',
-            type: 'number',
-            defaultValue: 30831
-        },
-    ],
-    async run (context, keyPath, host, port) {
-        return getToken(context, keyPath, host, port);
+function readParamsFromEnv(context) {
+    const fs = require('fs')
+
+    const params = {
+        graphqlUrl: context.request.getEnvironmentVariable("lagoon_graphql_url") || DEFAULT_GRAPHQL_URL,
+        // A manually provided token. If this is provided, there's no need to
+        // fetch new tokens, therefore no need to provide the ssh details.
+        graphqlToken: context.request.getEnvironmentVariable("lagoon_graphql_token"),
+        sshHost: context.request.getEnvironmentVariable("lagoon_ssh_host") || DEFAULT_SSH_HOST,
+        sshPort: context.request.getEnvironmentVariable("lagoon_ssh_port") || DEFAULT_SSH_PORT,
+        sshPrivateKey: context.request.getEnvironmentVariable("lagoon_ssh_private_key"),
+    };
+
+    // Use the first-found default key.
+    if (!params.graphqlToken && !params.sshPrivateKey) {
+        for (const key of DEFAULT_SSH_PRIVATE_KEYS) {
+            if (!fs.existsSync(key)) {
+                continue;
+            }
+            params.sshPrivateKey = key;
+            break;
+        }
     }
-}];
+    return params;
+}
 
-async function getToken(context, privateKeyPath, host, port) {
-    if (await context.store.hasItem("token")) {
-        token = await context.store.getItem("token")
+/**
+ * Request hook that fetches a Lagoon token and adds it to the request header.
+ */
+module.exports.requestHooks = [
+    async context => {
+        params = readParamsFromEnv(context);
+        if (!context.request.getUrl() == params.graphqlUrl) {
+            return;
+        }
+        context.request.setAuthenticationParameter("token", await getToken(context));
+        context.request.setHeader('Content-Type', 'application/json');
+    }
+];
+
+async function getToken(context) {
+    const hash = require('object-hash');
+    const params = readParamsFromEnv(context);
+    const tokenKey = `${hash(params)}-token`;
+
+    let token;
+
+    if (await context.store.hasItem(tokenKey)) {
+        token = await context.store.getItem(tokenKey)
         if (tokenIsValid(token)) {
             console.log("Token is still valid, will use.")
             return token
         }
     }
+
+    // No need to fetch new token if one provided.
+    if (params.graphqlToken) {
+        return params.graphqlToken;
+    }
+
     console.log("Fetching new token.")
-
-    token = fetchTokenFromSsh(privateKeyPath, host, port);
-    await context.store.setItem("token", token);
-
+    token = await fetchTokenFromSsh(params.sshPrivateKey, params.sshHost, params.sshPort);
+    await context.store.setItem(tokenKey, token);
     return token
 }
 
