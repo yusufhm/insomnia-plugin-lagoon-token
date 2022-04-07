@@ -1,5 +1,5 @@
 # Lagoon token
-A plugin for Insomnia which automatically fetches a token from the Lagoon GraphQL API, in the [manner described in the docs](https://docs.lagoon.sh/using-lagoon-advanced/graphql/#connect-to-graphql-api).
+A plugin for [Insomnia](https://insomnia.rest/) which automatically fetches a token from the Lagoon GraphQL API, in the [manner described in the docs](https://docs.lagoon.sh/using-lagoon-advanced/graphql/#connect-to-graphql-api).
 
 ## Install
 
