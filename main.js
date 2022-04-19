@@ -39,6 +39,10 @@ function readParamsFromEnv(context) {
  */
 module.exports.requestHooks = [
     async context => {
+        lagoonGraphqlUrl = context.request.getEnvironmentVariable("lagoon_graphql_url");
+        if (lagoonGraphqlUrl == null) {
+            return;
+        }
         params = readParamsFromEnv(context);
         if (!context.request.getUrl() == params.graphqlUrl) {
             return;
