@@ -10,7 +10,7 @@ Either:
 
 In case there's an error when installing as above, go into the [plugins directory](https://docs.insomnia.rest/insomnia/introduction-to-plugins#plugin-file-location) and run `npm install insomnia-plugin-lagoon-token` manually.
 
-## After installing the plugin
+## Usage
 
 1. Create an environment and set the Lagoon GraphQL API endpoint:
     ```json
