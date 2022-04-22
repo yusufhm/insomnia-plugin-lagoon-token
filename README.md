@@ -34,7 +34,7 @@ In case there's an error when installing as above, go into the [plugins director
 
 4. Create a request with url `{{ _.lagoon_graphql_url }}` and set the environment created in step 1. Make sure to check **Enabled** in the Bearer tab, but leave the TOKEN empty.
 
-The plugin will fetch the token (**when `lagoon_graphql_token` is not provided**) and add it as a bearer token to the header. The `Content-Type` header is also set to `application/json` automatically.
+    The plugin will fetch the token (**when `lagoon_graphql_token` is not provided**) and add it as a bearer token to the header. The `Content-Type` header is also set to `application/json` automatically.
 
 5. Profit.
 
