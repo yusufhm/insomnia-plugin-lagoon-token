@@ -10,25 +10,18 @@ Either:
 
 In case there's an error when installing as above, go into the [plugins directory](https://docs.insomnia.rest/insomnia/introduction-to-plugins#plugin-file-location) and run `npm install insomnia-plugin-lagoon-token` manually.
 
-## Configuration
+## After installing the plugin
 
-The plugin expects the following variables in an environment:
-| Name                   | Required | Default[^1]                                                        | Description                                                                                                                        |
-| ---------------------- | :------: | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| lagoon_graphql_url     |    No    | `https://api.lagoon.amazeeio.cloud/graphql`                        | The GraphQL endpoint for the Lagoon instance.                                                                                      |
-| lagoon_graphql_token   |    No    | -                                                                  | A manually provided token. If this is provided, there's no need to fetch new tokens, therefore no need to provide the ssh details. |
-| lagoon_ssh_host        |    No    | `ssh.lagoon.amazeeio.cloud`                                        | The Lagoon SSH host for fetching the token.                                                                                        |
-| lagoon_ssh_port        |    No    | 32222                                                              | The Lagoon SSH port.                                                                                                               |
-| lagoon_ssh_private_key |    No    | `/your/user/home/.ssh/id_ed25519` or `/your/user/home/.ssh/id_rsa` | The private key to use for SSH; this should have already been added to your user in the Lagoon UI[^2].                             |
+1. Create an environment and set the Lagoon GraphQL API endpoint:
+    ```json
+    {
+        "lagoon_graphql_url": "https://api.lagoon.amazeeio.cloud/graphql"
+    }
+    ```
 
-[^1]: Defaults are taken from the [Lagoon GraphQL documentation](https://docs.lagoon.sh/using-lagoon-advanced/graphql/).
-[^2]: Adding an SSH key to your Lagoon user: https://docs.lagoon.sh/using-lagoon-advanced/ssh/
+2. If you have already set up your `~/.ssh/id_ed25519` or `~/.ssh/id_rsa` to talk to Lagoon, skip to step 4.
 
-### After installing the plugin
-
-1. If you're connecting to the Lagoon public cloud and you have already set up your `~/.ssh/id_ed25519` or `~/.ssh/id_rsa` to talk to Lagoon, you should only have to enable the plugin, then you can start creating requests against `https://api.lagoon.amazeeio.cloud/graphql` and it should just work.
-
-2. Create an Environment using the following template:
+3. Create an Environment using the following template:
     ```json
     {
         "lagoon_graphql_url": "https://api.lagoon.amazeeio.cloud/graphql",
@@ -39,4 +32,39 @@ The plugin expects the following variables in an environment:
     }
     ```
 
-The plugin will now fetch the token (when `lagoon_graphql_token` is not provided) and adds it as a bearer token to the header. The `Content-Type` header is also set to `application/json` automatically.
+4. Create a request with url `{{ _.lagoon_graphql_url }}` and set the environment created in step 1. Make sure to check **Enabled** in the Bearer tab, but leave the TOKEN empty.
+
+The plugin will fetch the token (**when `lagoon_graphql_token` is not provided**) and add it as a bearer token to the header. The `Content-Type` header is also set to `application/json` automatically.
+
+5. Profit.
+
+## Configuration
+
+The plugin expects the following variables in the environment:
+
+- lagoon_graphql_url:
+  - Description: The GraphQL endpoint for the Lagoon instance.
+  - Required: Yes
+  - Default[^1]: `https://api.lagoon.amazeeio.cloud/graphql`
+- lagoon_graphql_token
+  - Description: A manually provided token. If this is provided, tokens won't be fetched nor renewed, and it overrides the SSH options.
+  - Required: No
+  - Default: -
+  - Note: *We highly recommend **not using this option** as the token will either be short-lived and you will have to manually update it yourself when it expires, or long-lived for a service account, which might pose a security risk. Use the SSH options instead (which is the default).*
+- lagoon_ssh_host
+  - Description: The Lagoon SSH host for fetching the token.
+  - Required: No
+  - Default[^1]: `ssh.lagoon.amazeeio.cloud`
+- lagoon_ssh_port
+  - Description: The Lagoon SSH port.
+  - Required: No
+  - Default[^1]: `32222`
+- lagoon_ssh_private_key
+  - Description: The private key to use for SSH; this should have already been added to your user in the Lagoon UI[^2].
+  - Required: No
+  - Default: `/your/user/home/.ssh/id_ed25519` or `/your/user/home/.ssh/id_rsa`
+
+[^1]: Defaults are taken from the [Lagoon GraphQL documentation](https://docs.lagoon.sh/using-lagoon-advanced/graphql/).
+[^2]: Adding an SSH key to your Lagoon user: https://docs.lagoon.sh/using-lagoon-advanced/ssh/
+
+
