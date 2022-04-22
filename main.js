@@ -79,15 +79,16 @@ async function getToken(context) {
 }
 
 async function fetchTokenFromSsh(privateKeyPath, host, port) {
-    const {NodeSSH} = require('node-ssh')
-    const ssh = new NodeSSH()
-    await ssh.connect({
-        host: host,
-        port: port,
-        username: 'lagoon',
-        privateKey: privateKeyPath,
-    })
-    return await ssh.exec("token", []);
+    const { execSync } = require("child_process");
+    const cmd = `ssh -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" -q -i ${privateKeyPath} lagoon@${host} -p ${port} token`
+    let token
+    try {
+        const buf = execSync(cmd);
+        token = buf.toString().trim()
+    } catch (error) {
+        console.error(error);
+    }
+    return token;
 }
 
 function tokenIsValid(token) {
