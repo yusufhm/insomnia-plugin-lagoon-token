@@ -92,6 +92,9 @@ async function fetchTokenFromSsh(privateKeyPath, host, port) {
 }
 
 function tokenIsValid(token) {
+    if (!token) {
+        return false
+    }
     const jwt_decode = require("jwt-decode");
     const decoded = jwt_decode(token);
     const now = Math.floor(Date.now() / 1000)
