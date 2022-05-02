@@ -92,7 +92,7 @@ async function fetchTokenFromSsh(privateKeyPath, host, port) {
 }
 
 function tokenIsValid(token) {
-    if (!token) {
+    if (!token || typeof token === 'undefined' || token == 'undefined') {
         return false
     }
     const jwt_decode = require("jwt-decode");
