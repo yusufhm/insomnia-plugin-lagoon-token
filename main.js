@@ -19,6 +19,7 @@ function readParamsFromEnv(context) {
         sshHost: context.request.getEnvironmentVariable("lagoon_ssh_host") || DEFAULT_SSH_HOST,
         sshPort: context.request.getEnvironmentVariable("lagoon_ssh_port") || DEFAULT_SSH_PORT,
         sshPrivateKey: context.request.getEnvironmentVariable("lagoon_ssh_private_key"),
+        sshPassphrase: context.request.getEnvironmentVariable('lagoon_ssh_passphrase'),
     };
 
     // Use the first-found default key.
@@ -73,28 +74,25 @@ async function getToken(context) {
     }
 
     console.log("Fetching new token.")
-    token = await fetchTokenFromSsh(params.sshPrivateKey, params.sshHost, params.sshPort);
+    token = await fetchTokenFromSsh(params.sshPrivateKey, params.sshHost, params.sshPort, params.sshPassphrase);
     await context.store.setItem(tokenKey, token);
     return token
 }
 
-async function fetchTokenFromSsh(privateKeyPath, host, port) {
-    const { execSync } = require("child_process");
-    const cmd = `ssh -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" -q -i ${privateKeyPath} lagoon@${host} -p ${port} token`
-    let token
-    try {
-        const buf = execSync(cmd);
-        token = buf.toString().trim()
-    } catch (error) {
-        console.error(error);
-    }
-    return token;
+async function fetchTokenFromSsh(privateKey, host, port, passphrase) {
+    const {NodeSSH} = require('node-ssh')
+    const ssh = new NodeSSH()
+    await ssh.connect({
+        username: 'lagoon',
+        privateKey,
+        host,
+        port,
+        passphrase,
+    })
+    return await ssh.exec("token", []);
 }
 
 function tokenIsValid(token) {
-    if (!token || typeof token === 'undefined' || token == 'undefined') {
-        return false
-    }
     const jwt_decode = require("jwt-decode");
     const decoded = jwt_decode(token);
     const now = Math.floor(Date.now() / 1000)
