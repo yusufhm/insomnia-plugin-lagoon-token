@@ -1,16 +1,8 @@
-const HOME = require('os').homedir();
-
 const DEFAULT_GRAPHQL_URL = "https://api.lagoon.amazeeio.cloud/graphql";
 const DEFAULT_SSH_HOST = "ssh.lagoon.amazeeio.cloud";
 const DEFAULT_SSH_PORT = 32222;
-const DEFAULT_SSH_PRIVATE_KEYS = [
-    `${HOME}/.ssh/id_ed25519`,
-    `${HOME}/.ssh/id_rsa`,
-];
 
 function readParamsFromEnv(context) {
-    const fs = require('fs')
-
     const params = {
         graphqlUrl: context.request.getEnvironmentVariable("lagoon_graphql_url") || DEFAULT_GRAPHQL_URL,
         // A manually provided token. If this is provided, there's no need to
@@ -19,18 +11,9 @@ function readParamsFromEnv(context) {
         sshHost: context.request.getEnvironmentVariable("lagoon_ssh_host") || DEFAULT_SSH_HOST,
         sshPort: context.request.getEnvironmentVariable("lagoon_ssh_port") || DEFAULT_SSH_PORT,
         sshPrivateKey: context.request.getEnvironmentVariable("lagoon_ssh_private_key"),
+        sshAuthSock: context.request.getEnvironmentVariable("lagoon_ssh_auth_sock"),
     };
 
-    // Use the first-found default key.
-    if (!params.graphqlToken && !params.sshPrivateKey) {
-        for (const key of DEFAULT_SSH_PRIVATE_KEYS) {
-            if (!fs.existsSync(key)) {
-                continue;
-            }
-            params.sshPrivateKey = key;
-            break;
-        }
-    }
     return params;
 }
 
@@ -73,14 +56,21 @@ async function getToken(context) {
     }
 
     console.log("Fetching new token.")
-    token = await fetchTokenFromSsh(params.sshPrivateKey, params.sshHost, params.sshPort);
+    token = await fetchTokenFromSsh(params);
     await context.store.setItem(tokenKey, token);
     return token
 }
 
-async function fetchTokenFromSsh(privateKeyPath, host, port) {
+async function fetchTokenFromSsh(params) {
     const { execSync } = require("child_process");
-    const cmd = `ssh -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" -q -i ${privateKeyPath} lagoon@${host} -p ${port} token`
+    let cmd = `ssh -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" -q `;
+    if (params.sshPrivateKey) {
+        cmd += `-i ${params.sshPrivateKey} `;
+    }
+    if (params.sshAuthSock) {
+        cmd += `-o "IdentityAgent='${params.sshAuthSock}'" `;
+    }
+    cmd += `lagoon@${params.sshHost} -p ${params.sshPort} token`;
     let token
     try {
         const buf = execSync(cmd);

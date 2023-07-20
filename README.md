@@ -32,6 +32,13 @@ In case there's an error when installing as above, go into the [plugins director
     }
     ```
 
+    You can also specify an SSH agent:
+    ```json
+    {
+      "lagoon_ssh_auth_sock": "/your/custom/agent.sock"
+    }
+    ```
+
 4. Create a request with url `{{ _.lagoon_graphql_url }}` and set the environment created in step 1. Make sure to check **Enabled** in the Bearer tab, but leave the TOKEN empty.
 
     The plugin will fetch the token (**when `lagoon_graphql_token` is not provided**) and add it as a bearer token to the header. The `Content-Type` header is also set to `application/json` automatically.
@@ -62,7 +69,11 @@ The plugin expects the following variables in the environment:
 - lagoon_ssh_private_key
   - Description: The private key to use for SSH; this should have already been added to your user in the Lagoon UI[^2].
   - Required: No
-  - Default: `/your/user/home/.ssh/id_ed25519` or `/your/user/home/.ssh/id_rsa`
+  - Default: -
+- lagoon_ssh_auth_sock
+  - Description: The SSH agent socket to use (overriding $SSH_AUTH_SOCK).
+  - Required: No
+  - Default: -
 
 [^1]: Defaults are taken from the [Lagoon GraphQL documentation](https://docs.lagoon.sh/using-lagoon-advanced/graphql/).
 [^2]: Adding an SSH key to your Lagoon user: https://docs.lagoon.sh/using-lagoon-advanced/ssh/
